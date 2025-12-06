@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Mood</title>
+    <style>
+        /* Hide the emoji picker by default */
+        #emoji-picker-container {
+            display: none;
+            margin-top: 15px;
+            position: absolute;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Add today's mood</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div style="position: relative;">
+            <label for="{{ form.emoji.id_for_label }}">Emoji:</label><br>
+            {{ form.emoji }}
+            <!-- Move the picker container inside the emoji input's container for placement -->
+            <div id="emoji-picker-container">
+                <emoji-picker id="emoji-picker"></emoji-picker>
+            </div>
+        </div>
+
+        <div style="margin-top: 10px;">
+            <label for="{{ form.reason.id_for_label }}">Reason:</label><br>
+            {{ form.reason }}
+        </div>
+
+        <button type="submit" style="margin-top: 10px;">Save</button>
+    </form>
+
+    {% if mood %}
+    <form method="post" action="{% url 'delete_mood' mood.id %}" style="margin-top: 10px;">
+        {% csrf_token %}
+        <button type="submit" style="background:red; color:white;">
+            Delete
+        </button>
+    </form>
+    {% endif %}
+    
+    <hr>
+
+    <!-- 1) Load emoji picker library -->
+    <script type="module"
+            src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js">
+    </script>
+
+    <!-- 3) Show & hide logic -->
+    <script>
+        // Use the same id that Django generated for the emoji field
+        const emojiInput = document.getElementById("{{ form.emoji.id_for_label }}");
+        const pickerContainer = document.getElementById("emoji-picker-container");
+        const picker = document.getElementById("emoji-picker");
+
+        // Function to position picker below emoji input
+        function positionPicker() {
+            const rect = emojiInput.getBoundingClientRect();
+            pickerContainer.style.left = rect.left + window.scrollX + "px";
+            pickerContainer.style.top = rect.bottom + window.scrollY + "px";
+            pickerContainer.style.width = rect.width + "px";
+        }
+
+        // Show picker when input is focused
+        emojiInput.addEventListener("focus", () => {
+            positionPicker();
+            pickerContainer.style.display = "block";
+        });
+
+        // show on click (fix for input not focusing e.g. with mouse)
+        emojiInput.addEventListener("click", () => {
+            positionPicker();
+            pickerContainer.style.display = "block";
+        });
+
+        // Insert emoji into input and hide picker
+        picker.addEventListener("emoji-click", event => {
+            const emoji = event.detail.unicode;
+            emojiInput.value = emoji;
+            pickerContainer.style.display = "none";
+            // To support form widgets that respond to input events:
+            emojiInput.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+
+        // Hide picker when clicking outside input + picker
+        document.addEventListener("mousedown", e => {
+            const clickedInsidePicker = pickerContainer.contains(e.target);
+            const clickedInput = (e.target === emojiInput);
+            if (!clickedInsidePicker && !clickedInput) {
+                pickerContainer.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
