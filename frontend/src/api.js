@@ -1,10 +1,6 @@
-// frontend/src/api.js
 
-const BASE_URL = "http://127.0.0.1:8000"; // adjust if your backend URL is different
+const BASE_URL = "http://127.0.0.1:8000"; 
 
-/**
- * Helper function to handle API errors with detailed messages
- */
 async function handleResponse(response) {
   if (!response.ok) {
     let errorMessage = `Request failed with status ${response.status}`;
@@ -39,11 +35,11 @@ async function handleResponse(response) {
   return null;
 }
 
-export async function fetchMoods() {
+
+export async function fetchMoods(url = `${BASE_URL}/api/mood/`) {
   try {
-    const res = await fetch(`${BASE_URL}/api/mood/`);
-    const data = await handleResponse(res);
-    return data || [];
+    const res = await fetch(url);
+    return await handleResponse(res);
   } catch (error) {
     if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
       throw new Error("Unable to connect to server. Please check if the backend is running.");
@@ -51,6 +47,7 @@ export async function fetchMoods() {
     throw error;
   }
 }
+
 
 export async function createMood(data) {
   try {
