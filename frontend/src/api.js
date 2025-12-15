@@ -1,10 +1,10 @@
 
-const BASE_URL = "http://127.0.0.1:8000"; 
 
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 async function handleResponse(response) {
   if (!response.ok) {
     let errorMessage = `Request failed with status ${response.status}`;
-    
+
     try {
       const errorData = await response.json();
       // Try to extract meaningful error message from response
@@ -21,12 +21,12 @@ async function handleResponse(response) {
       // If response is not JSON, use status text
       errorMessage = response.statusText || errorMessage;
     }
-    
+
     const error = new Error(errorMessage);
     error.status = response.status;
     throw error;
   }
-  
+
   // Handle empty responses (e.g., DELETE requests)
   const contentType = response.headers.get("content-type");
   if (contentType && contentType.includes("application/json")) {
@@ -36,7 +36,7 @@ async function handleResponse(response) {
 }
 
 
-export async function fetchMoods(url = `${BASE_URL}/api/mood/`) {
+export async function fetchMoods(url = `${API_BASE_URL}/api/mood/`) {
   try {
     const res = await fetch(url);
     return await handleResponse(res);
@@ -51,7 +51,7 @@ export async function fetchMoods(url = `${BASE_URL}/api/mood/`) {
 
 export async function createMood(data) {
   try {
-    const res = await fetch(`${BASE_URL}/api/mood/`, {
+    const res = await fetch(`${API_BASE_URL}/api/mood/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -67,7 +67,7 @@ export async function createMood(data) {
 
 export async function updateMood(id, data) {
   try {
-    const res = await fetch(`${BASE_URL}/api/mood/${id}/`, {
+    const res = await fetch(`${API_BASE_URL}/api/mood/${id}/`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -86,7 +86,7 @@ export async function updateMood(id, data) {
 
 export async function deleteMood(id) {
   try {
-    const res = await fetch(`${BASE_URL}/api/mood/${id}/`, {
+    const res = await fetch(`${API_BASE_URL}/api/mood/${id}/`, {
       method: "DELETE",
     });
     await handleResponse(res);

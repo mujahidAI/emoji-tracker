@@ -1,11 +1,19 @@
-
-import { useEffect, useState } from "react"; 
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import Layout from "../components/Layout.jsx";
 import MoodForm from "../components/MoodForm.jsx";
-import { fetchMoods } from "../api.js"; // ⬅️ fetch single mood via API
-
+import { API_BASE_URL } from "../api.js";
+/**
+ * EditMood component for editing an existing mood entry.
+ * It fetches the mood data based on the ID from the URL,
+ * provides a form to update the mood, and handles deletion.
+ * @param {object} props - The component props.
+ * @param {function} props.updateMood - Function to call when updating a mood.
+ * @param {function} props.deleteMood - Function to call when deleting a mood.
+ */
 export default function EditMood({ updateMood, deleteMood }) {
+  const [searchParams, _] = useSearchParams();
+  const page = searchParams.get("page");
   const { id } = useParams();
   const navigate = useNavigate();
   const numericId = Number(id);
@@ -15,8 +23,12 @@ export default function EditMood({ updateMood, deleteMood }) {
   const [error, setError] = useState("");
 
   // ⬅️ FETCH mood by ID 
+  /**
+   * Effect hook to fetch the mood data from the API when the component mounts
+   * or when the numericId changes.
+   */
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/api/mood/${numericId}/`)
+    fetch(`${API_BASE_URL}/api/mood/${numericId}/`)
       .then((res) => {
         if (!res.ok) throw new Error("Mood not found");
         return res.json();
@@ -52,18 +64,27 @@ export default function EditMood({ updateMood, deleteMood }) {
     );
   }
 
+  /**
+   * Handles saving the updated mood data.
+   * Calls the `updateMood` prop function and navigates to the home page on success.
+   * @param {object} data - The updated mood data.
+   */
   const handleSave = async (data) => {
     try {
       setIsLoading(true);
       setError("");
       await updateMood(numericId, data);
-      navigate("/");
+      navigate(`/?page=${page}`);
     } catch (err) {
       setError(err.message || "Failed to update mood.");
       setIsLoading(false);
     }
   };
 
+  /**
+   * Handles deleting the current mood.
+   * Calls the `deleteMood` prop function and navigates to the home page on success.
+   */
   const handleDelete = async () => {
     try {
       setIsLoading(true);

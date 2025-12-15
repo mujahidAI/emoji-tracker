@@ -13,7 +13,7 @@ EMOJI_CHOICES = [
 
 class Mood(models.Model):
     emoji = models.CharField(max_length=10, choices=EMOJI_CHOICES)
-    reason = models.CharField(max_length=255)
+    reason = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
