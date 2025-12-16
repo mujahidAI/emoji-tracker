@@ -1,6 +1,6 @@
 # Emoji Tracker
 
-A full-stack web application for tracking your daily moods using emojis. Built with Django REST Framework backend and React frontend.
+A full-stack web application for tracking your daily moods using emojis. Built with Django REST Framework backend and React frontend (available in both Vite and Next.js versions).
 
 ## Features
 
@@ -18,10 +18,17 @@ A full-stack web application for tracking your daily moods using emojis. Built w
 - **Django REST Framework** 3.16.1 - REST API toolkit
 - **django-cors-headers** - CORS handling for API requests
 
-### Frontend
+### Frontend Options
+
+#### Option 1: React + Vite (frontend/)
 - **React** 19.2.0 - UI library
 - **React Router DOM** 7.10.1 - Client-side routing
 - **Vite** - Build tool and dev server
+
+#### Option 2: Next.js (frontend-next/)
+- **Next.js** 15+ - React framework with SSR/SSG
+- **React** 19+ - UI library
+- Built-in routing and optimization
 
 ## Prerequisites
 
@@ -76,7 +83,7 @@ Before you begin, ensure you have the following installed:
    python manage.py seed_november
    ```
 
-### Frontend Setup
+### Frontend Setup (React + Vite)
 
 1. **Navigate to the frontend directory:**
    ```bash
@@ -87,6 +94,26 @@ Before you begin, ensure you have the following installed:
    ```bash
    npm install
    ```
+
+### Frontend Setup (Next.js)
+
+1. **Navigate to the frontend-next directory:**
+   ```bash
+   cd frontend-next
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables:**
+   Create a `.env.local` file in the `frontend-next` directory:
+   ```bash
+   NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
+   ```
+   
+   **Important:** This environment variable tells the Next.js frontend where to find the Django backend API.
 
 ## Running the Application
 
@@ -112,6 +139,8 @@ Before you begin, ensure you have the following installed:
 
 ### Start the Frontend Development Server
 
+#### Option 1: React + Vite
+
 1. **Open a new terminal** and navigate to the frontend directory:
    ```bash
    cd frontend
@@ -124,7 +153,23 @@ Before you begin, ensure you have the following installed:
 
    The frontend will be available at `http://localhost:5173` (or the port shown in the terminal)
 
+#### Option 2: Next.js
+
+1. **Open a new terminal** and navigate to the frontend-next directory:
+   ```bash
+   cd frontend-next
+   ```
+
+2. **Start the Next.js development server:**
+   ```bash
+   npm run dev
+   ```
+
+   The frontend will be available at `http://localhost:3000` (or the port shown in the terminal)
+
 3. **Open your browser** and navigate to the frontend URL to use the application.
+
+**Note:** You only need to run ONE frontend at a time. Choose either the Vite or Next.js version based on your preference.
 
 ## Project Structure
 
@@ -144,21 +189,37 @@ Emoji Tracker/
 │   ├── requirements.txt    # Python dependencies
 │   └── db.sqlite3          # SQLite database
 │
-└── frontend/               # React frontend
+├── frontend/               # React + Vite frontend
+│   ├── src/
+│   │   ├── api.js          # API client functions
+│   │   ├── App.jsx         # Main app component
+│   │   ├── main.jsx        # Entry point
+│   │   ├── components/     # Reusable components
+│   │   │   ├── Layout.jsx
+│   │   │   ├── MoodForm.jsx
+│   │   │   └── MoodList.jsx
+│   │   └── pages/          # Page components
+│   │       ├── Home.jsx
+│   │       ├── AddMood.jsx
+│   │       └── EditMood.jsx
+│   ├── package.json        # Node dependencies
+│   └── vite.config.js      # Vite configuration
+│
+└── frontend-next/          # Next.js frontend
     ├── src/
-    │   ├── api.js          # API client functions
-    │   ├── App.jsx         # Main app component
-    │   ├── main.jsx        # Entry point
+    │   ├── app/            # App router pages
+    │   │   ├── layout.js   # Root layout
+    │   │   ├── page.js     # Home page
+    │   │   ├── add/        # Add mood page
+    │   │   └── edit/       # Edit mood page
     │   ├── components/     # Reusable components
-    │   │   ├── Layout.jsx
     │   │   ├── MoodForm.jsx
     │   │   └── MoodList.jsx
-    │   └── pages/          # Page components
-    │       ├── Home.jsx
-    │       ├── AddMood.jsx
-    │       └── EditMood.jsx
+    │   └── lib/
+    │       └── api.js      # API client functions
+    ├── .env.local          # Environment variables
     ├── package.json        # Node dependencies
-    └── vite.config.js      # Vite configuration
+    └── next.config.js      # Next.js configuration
 ```
 
 ## API Endpoints
@@ -250,7 +311,19 @@ The backend configuration is in `backend/emoji_tracker/settings.py`. Key setting
 
 ### Frontend Configuration
 
+#### React + Vite
 The API base URL is configured in `frontend/src/api.js`. Default is `http://127.0.0.1:8000`. Update this if your backend runs on a different host/port.
+
+#### Next.js
+The API base URL is configured via environment variables in `frontend-next/.env.local`:
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
+```
+
+**Important:** 
+- Environment variables in Next.js must be prefixed with `NEXT_PUBLIC_` to be accessible in the browser
+- After changing `.env.local`, you must restart the Next.js dev server for changes to take effect
+- Never commit `.env.local` to version control (it's gitignored by default)
 
 ## Troubleshooting
 
@@ -262,8 +335,20 @@ The API base URL is configured in `frontend/src/api.js`. Default is `http://127.
 
 ### Frontend Issues
 
+#### React + Vite
 - **Cannot connect to backend:** Ensure the backend server is running and the `BASE_URL` in `api.js` matches your backend URL.
 - **Module not found:** Run `npm install` to install dependencies.
 - **Port conflicts:** Vite will automatically use the next available port.
+
+#### Next.js
+- **"Unable to connect to server" error:** 
+  - Ensure the backend server is running at `http://127.0.0.1:8000`
+  - Check that `.env.local` has the correct `NEXT_PUBLIC_API_BASE_URL` value
+  - Restart the Next.js dev server after changing environment variables
+- **Environment variables not working:** 
+  - Ensure the variable is prefixed with `NEXT_PUBLIC_`
+  - Restart the dev server (environment variables are loaded at startup)
+- **Module not found:** Run `npm install` to install dependencies.
+- **Port conflicts:** Next.js will automatically use the next available port (usually 3000, 3001, etc.).
 
 
