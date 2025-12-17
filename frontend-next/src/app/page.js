@@ -2,6 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Paper from '@mui/material/Paper';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Pagination from '@mui/material/Pagination';
+import AddIcon from '@mui/icons-material/Add';
 
 import MoodList from "@/components/MoodList";
 import { fetchMoods, API_BASE_URL } from "@/lib/api";
@@ -17,20 +24,9 @@ export default function Home() {
   const [moods, setMoods] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      const next = currentPage + 1;
-      setCurrentPage(next);
-      router.push(`/?page=${next}`);
-    }
-  };
-
-  const goToPrevPage = () => {
-    if (currentPage > 1) {
-      const prev = currentPage - 1;
-      setCurrentPage(prev);
-      router.push(`/?page=${prev}`);
-    }
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+    router.push(`/?page=${value}`);
   };
 
   const loadPage = (page) => {
@@ -48,20 +44,35 @@ export default function Home() {
   }, [currentPage]);
 
   return (
-    <>
-      <div className="home-header-row">
-        <h2 className="section-title">Your moods</h2>
+    <Paper elevation={4} sx={{ p: 4, borderRadius: 3, minHeight: '70vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
+        <Typography variant="h4" component="h2" sx={{ fontWeight: 600 }}>
+          Your Moods
+        </Typography>
 
-        <button
-          className="btn btn-primary"
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<AddIcon />}
           onClick={() => router.push("/add-mood")}
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #5a6fd4 0%, #63408a 100%)',
+            },
+          }}
         >
           Add Mood
-        </button>
-      </div>
+        </Button>
+      </Box>
 
       {loading ? (
-        <p>Loading moods...</p>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8 }}>
+          <CircularProgress size={60} thickness={4} />
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+            Loading moods...
+          </Typography>
+        </Box>
       ) : (
         <>
           <MoodList
@@ -71,17 +82,21 @@ export default function Home() {
             }
           />
 
-          <div className="pagination">
-            <button disabled={currentPage <= 1} onClick={goToPrevPage}>
-              Prev
-            </button>
-
-            <button disabled={currentPage >= totalPages} onClick={goToNextPage}>
-              Next
-            </button>
-          </div>
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, pt: 3 }}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
+              />
+            </Box>
+          )}
         </>
       )}
-    </>
+    </Paper>
   );
 }

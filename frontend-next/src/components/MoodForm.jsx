@@ -1,5 +1,21 @@
-// frontend/src/components/MoodForm.jsx
 import { useState } from "react";
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import LoadingButton from '@mui/lab/LoadingButton';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import SaveIcon from '@mui/icons-material/Save';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // 6 fixed mood emojis
 const EMOJI_OPTIONS = ["😀", "🙂", "😐", "😢", "😡", "😴"];
@@ -14,6 +30,7 @@ export default function MoodForm({
   const [emoji, setEmoji] = useState(initialMood?.emoji || "");
   const [reason, setReason] = useState(initialMood?.reason || "");
   const [error, setError] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -28,98 +45,158 @@ export default function MoodForm({
   };
 
   const handleDeleteClick = () => {
-    if (!initialMood || !onDelete) return;
-    const ok = window.confirm(
-      "Are you sure you want to delete this mood entry?"
-    );
-    if (ok) {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    setDeleteDialogOpen(false);
+    if (onDelete) {
       onDelete();
     }
   };
 
+  const handleEmojiChange = (event, newEmoji) => {
+    if (newEmoji !== null) {
+      setEmoji(newEmoji);
+      setError("");
+    }
+  };
+
   return (
-    <div className="mood-form">
-      <h2 className="mood-form-title">
-        {initialMood ? "Edit mood" : "Add today's mood"}
-      </h2>
-      <p className="mood-form-subtitle">
-        Choose a mood emoji and write a short note about your day.
-      </p>
+    <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+      <Box sx={{ maxWidth: 600, mx: 'auto' }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, mb: 1 }}>
+          {initialMood ? "Edit mood" : "Add today's mood"}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+          Choose a mood emoji and write a short note about your day.
+        </Typography>
 
-      <form onSubmit={handleSubmit} className="mood-form-form">
-        {/* Emoji Selection */}
-        <div className="form-field">
-          <label htmlFor="emoji" className="form-label">
-            Mood Emoji <span className="required">*</span>
-          </label>
-          <div className="emoji-selector">
-            {EMOJI_OPTIONS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={`emoji-option ${emoji === option ? "selected" : ""}`}
-                onClick={() => {
-                  setEmoji(option);
-                  setError("");
+        <Box component="form" onSubmit={handleSubmit}>
+          <Stack spacing={3}>
+            {/* Emoji Selection */}
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
+                Mood Emoji <span style={{ color: '#e74c3c' }}>*</span>
+              </Typography>
+              <ToggleButtonGroup
+                value={emoji}
+                exclusive
+                onChange={handleEmojiChange}
+                aria-label="mood emoji"
+                sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: 1,
+                  '& .MuiToggleButton-root': {
+                    fontSize: '2rem',
+                    width: 70,
+                    height: 70,
+                    border: '2px solid',
+                    borderColor: 'divider',
+                    borderRadius: 2,
+                    '&.Mui-selected': {
+                      borderColor: 'primary.main',
+                      bgcolor: 'primary.light',
+                      '&:hover': {
+                        bgcolor: 'primary.light',
+                      },
+                    },
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                      transition: 'transform 0.2s',
+                    },
+                  },
                 }}
-                aria-label={`Select ${option} emoji`}
               >
-                {option}
-              </button>
-            ))}
-          </div>
-          {error && <div className="error-message">{error}</div>}
-        </div>
+                {EMOJI_OPTIONS.map((option) => (
+                  <ToggleButton key={option} value={option} aria-label={`${option} emoji`}>
+                    {option}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+              {error && (
+                <Alert severity="error" sx={{ mt: 2 }}>
+                  {error}
+                </Alert>
+              )}
+            </Box>
 
-        {/* Reason Textarea */}
-        <div className="form-field">
-          <label htmlFor="reason" className="form-label">
-            Reason (optional)
-          </label>
-          <textarea
-            id="reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={4}
-            className="form-textarea"
-            placeholder="Why do you feel this way?"
-            disabled={isLoading}
-          />
-        </div>
+            {/* Reason TextField */}
+            <Box>
+              <TextField
+                fullWidth
+                multiline
+                rows={4}
+                label="Reason (optional)"
+                placeholder="Why do you feel this way?"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                disabled={isLoading}
+                variant="outlined"
+              />
+            </Box>
 
-        {/* Action Buttons */}
-        <div className="form-actions">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="btn btn-secondary"
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={isLoading || !emoji.trim()}
-          >
-            {isLoading ? "Saving..." : "Save"}
-          </button>
-        </div>
-      </form>
+            {/* Action Buttons */}
+            <Stack direction="row" spacing={2} justifyContent="flex-end">
+              <Button
+                variant="outlined"
+                onClick={onCancel}
+                disabled={isLoading}
+                size="large"
+              >
+                Cancel
+              </Button>
+              <LoadingButton
+                type="submit"
+                variant="contained"
+                loading={isLoading}
+                loadingPosition="start"
+                startIcon={<SaveIcon />}
+                disabled={!emoji.trim()}
+                size="large"
+              >
+                {isLoading ? "Saving..." : "Save"}
+              </LoadingButton>
+            </Stack>
+          </Stack>
+        </Box>
 
-      {/* Delete Button - only in edit mode */}
-      {initialMood && onDelete && (
-        <div className="form-delete-section">
-          <button
-            type="button"
-            onClick={handleDeleteClick}
-            className="btn btn-danger"
-            disabled={isLoading}
-          >
-            Delete Entry
-          </button>
-        </div>
-      )}
-    </div>
+        {/* Delete Button - only in edit mode */}
+        {initialMood && onDelete && (
+          <Box sx={{ mt: 4, pt: 3, borderTop: 1, borderColor: 'divider', textAlign: 'center' }}>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleDeleteClick}
+              disabled={isLoading}
+              size="large"
+            >
+              Delete Entry
+            </Button>
+          </Box>
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+        >
+          <DialogTitle>Delete Mood Entry?</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this mood entry? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleDeleteConfirm} color="error" variant="contained">
+              Delete
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </Paper>
   );
 }

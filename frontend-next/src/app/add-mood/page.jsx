@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
 
 import MoodForm from "@/components/MoodForm";
 import { createMood } from "@/lib/api";
@@ -25,11 +27,11 @@ export default function AddMood() {
   };
 
   return (
-    <>
+    <Box>
       {error && (
-        <div className="error-message" role="alert">
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
           {error}
-        </div>
+        </Alert>
       )}
 
       <MoodForm
@@ -38,6 +40,6 @@ export default function AddMood() {
         onCancel={() => router.push("/")}
         isLoading={isLoading}
       />
-    </>
+    </Box>
   );
 }

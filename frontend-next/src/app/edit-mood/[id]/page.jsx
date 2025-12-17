@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import HomeIcon from '@mui/icons-material/Home';
 
 import MoodForm from "@/components/MoodForm";
 import { updateMood, deleteMood, API_BASE_URL } from "@/lib/api";
@@ -18,7 +24,7 @@ export default function EditMood() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ⬅️ FETCH mood by ID (same logic as React)
+  // Fetch mood by ID
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/mood/${numericId}/`, {
       credentials: "include",
@@ -37,24 +43,38 @@ export default function EditMood() {
       });
   }, [numericId]);
 
-  // ⬅️ loading guard
+  // Loading state
   if (isLoading) {
-    return <p>Loading mood...</p>;
-  }
-
-  // ⬅️ error state instead of blank screen
-  if (!mood) {
     return (
-      <>
-        <div className="error-message">{error}</div>
-        <button className="btn btn-primary" onClick={() => router.push("/")}>
-          Go Home
-        </button>
-      </>
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 8 }}>
+        <CircularProgress size={60} thickness={4} />
+        <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+          Loading mood...
+        </Typography>
+      </Box>
     );
   }
 
-  // ⬅️ save handler (unchanged behavior)
+  // Error state
+  if (!mood) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 4 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+        <Button
+          variant="contained"
+          startIcon={<HomeIcon />}
+          onClick={() => router.push("/")}
+          size="large"
+        >
+          Go Home
+        </Button>
+      </Box>
+    );
+  }
+
+  // Save handler
   const handleSave = async (data) => {
     try {
       setIsLoading(true);
@@ -67,7 +87,7 @@ export default function EditMood() {
     }
   };
 
-  // ⬅️ delete handler (unchanged behavior)
+  // Delete handler
   const handleDelete = async () => {
     try {
       setIsLoading(true);
@@ -81,8 +101,12 @@ export default function EditMood() {
   };
 
   return (
-    <>
-      {error && <div className="error-message">{error}</div>}
+    <Box>
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError("")}>
+          {error}
+        </Alert>
+      )}
 
       <MoodForm
         initialMood={mood}
@@ -91,6 +115,6 @@ export default function EditMood() {
         onCancel={() => router.push("/")}
         isLoading={isLoading}
       />
-    </>
+    </Box>
   );
 }
