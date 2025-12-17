@@ -14,11 +14,19 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path,include
-
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('',include('emoji.urls')),
+    # API URLs
     path("api/", include('emoji.routers')),
+    # Admin site URL
+    path('admin/', admin.site.urls),
+    # Main application URLs
+    path('',include('emoji.urls')),
 ]
+"""
+URL patterns for the emoji_tracker project.
+
+This list routes URLs to their respective views or other URL configurations.
+- `admin/`: Django admin site.
+- `api/`: API endpoints defined by the 'emoji' app's routers.
+- `''`: Root URL, includes URLs from the 'emoji' app.
+"""
